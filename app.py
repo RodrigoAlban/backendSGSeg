@@ -21,8 +21,8 @@ def get_vulnerability(id):
 
 @app.route('/assets', methods=['GET'])
 def get_assets():
-    assets = Asset.query.all()
-    return jsonify({'assets': [{'id': a.id, 'name': a.name, 'version': a.version, 'product': a.product, 'vulnerabilities_count': len(a.vulnerabilities)} for a in assets]})
+    assets = Asset.query.order_by(Asset.priority_score.desc()).all()
+    return jsonify({'assets': [{'id': a.id, 'name': a.name, 'version': a.version, 'product': a.product, 'priority_score': a.priority_score, 'vulnerabilities_count': len(a.vulnerabilities)} for a in assets]})
 
 @app.route('/assets/<int:id>', methods=['GET'])
 def get_asset(id):

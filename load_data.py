@@ -47,7 +47,30 @@ def load_data():
                         print(f"Committed {count} records from {file}")
                 db.session.commit()
                 print(f"Loaded {count} records from {file}")
-
-if __name__ == '__main__':
-    with app.app_context():
-        load_data()
+    
+    # Calculate priority scores for assets
+    print("Calculating priority scores...")
+    assets = Asset.query.all()
+    for asset in assets:
+        vulns = asset.vulnerabilities
+        if not vulns:
+            asset.priority_score = 0
+            continue
+        vuln_count = len(vulns)
+        criticality_sum = 0
+        severity_sum = 0
+        count_valid = 0
+        severity_map = {'Critical': 10, 'High': 7, 'Medium': 5, 'Low': 3, 'Info': 1}
+        for v in vulns:
+            if v.criticality and v.criticality.isdigit():
+                criticality_sum += int(v.criticality)
+                count_valid += 1
+            if v.severity in severity_map:
+                severity_sum += severity_map[v.severity]
+        avg_criticality = criticality_sum / count_valid if count_valid else 0
+        avg_severity = severity_sum / vuln_count if vuln_count else 0
+        # Formula: 40% criticality, 40% severity, 20% vuln_count (capped at 50)
+        score = (avg_criticality / 10 * 40) + (avg_severity / 10 * 40) + (min(vuln_count, 50) / 50 * 20)
+        asset.priority_score = min(100, max(0, score))
+    db.session.commit()
+    print("Priority scores calculated.")

@@ -11,6 +11,7 @@ class Asset(db.Model):
     product = db.Column(db.String)
     file_path = db.Column(db.String)
     engagement = db.Column(db.String)
+    priority_score = db.Column(db.Float)  # Calculated prioritization score 0-100
 
     vulnerabilities = db.relationship('Vulnerability', backref='asset')
 
