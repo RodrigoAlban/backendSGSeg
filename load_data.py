@@ -74,3 +74,7 @@ def load_data():
         asset.priority_score = min(100, max(0, score))
     db.session.commit()
     print("Priority scores calculated.")
+
+if __name__ == '__main__':
+    with app.app_context():
+        load_data()
